@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VR Studio - Immersive Virtual Reality</title>
+  <style>
+    /* --- CSS STYLES --- */
+    :root {
+      --bg-color: #0B0E17;
+      --surface-color: #161B26;
+      --bar-color: #121722;
+      --primary-cyan: #00F0FF;
+      --primary-blue: #0072FF;
+      --text-main: #FFFFFF;
+      --text-muted: #8E9AAF;
+      --amber-gold: #FFB800;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Top App Bar */
+    .top-bar {
+      background-color: var(--bar-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(0, 240, 255, 0.2);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+      z-index: 10;
+    }
+
+    .brand-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-badge {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      border: 2px solid var(--primary-cyan);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 12px rgba(0, 240, 255, 0.5);
+      background: radial-gradient(circle, rgba(0,240,255,0.2) 0%, rgba(18,23,34,1) 80%);
+    }
+
+    .logo-badge svg {
+      width: 24px;
+      height: 24px;
+      fill: var(--primary-cyan);
+    }
+
+    .brand-titles h1 {
+      font-size: 16px;
+      font-weight: 900;
+      letter-spacing: 1.5px;
+      color: var(--text-main);
+      line-height: 1.1;
+    }
+
+    .brand-titles span {
+      font-size: 8px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: var(--primary-cyan);
+      display: block;
+    }
+
+    .role-switcher {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 4px 10px;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      cursor: pointer;
+    }
+
+    .role-badge {
+      font-size: 11px;
+      font-weight: bold;
+      padding: 2px 8px;
+      border-radius: 12px;
+    }
+
+    .role-badge.owner {
+      background-color: rgba(255, 184, 0, 0.2);
+      color: var(--amber-gold);
+      border: 1px solid var(--amber-gold);
+    }
+
+    .role-badge.player {
+      background-color: rgba(0, 240, 255, 0.2);
+      color: var(--primary-cyan);
+      border: 1px solid var(--primary-cyan);
+    }
+
+    /* Content Area */
+    .content-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      padding-bottom: 80px;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Cards & Layout */
+    .card {
+      background-color: var(--surface-color);
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 16px;
+      border: 1px solid rgba(0, 240, 255, 0.15);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .card-title {
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .tag {
+      font-size: 10px;
+      font-weight: bold;
+      padding: 4px 8px;
+      border-radius: 6px;
+      background-color: var(--primary-cyan);
+      color: #000;
+    }
+
+    .card-desc {
+      color: var(--text-muted);
+      font-size: 13px;
+      margin-bottom: 14px;
+      line-height: 1.4;
+    }
+
+    /* Buttons */
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background 0.2s;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-blue);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background-color: #0056cc;
+    }
+
+    .btn-cyan {
+      background-color: var(--primary-cyan);
+      color: #000;
+    }
+
+    .btn-owner {
+      background-color: var(--amber-gold);
+      color: #000;
+    }
+
+    /* Bottom Navigation Bar */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 65px;
+      background-color: var(--bar-color);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      border-top: 1px solid rgba(0, 240, 255, 0.2);
+      z-index: 10;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 11px;
+      width: 20%;
+    }
+
+    .nav-item svg {
+      width: 22px;
+      height: 22px;
+      fill: var(--text-muted);
+    }
+
+    .nav-item.active {
+      color: var(--primary-cyan);
+    }
+
+    .nav-item.active svg {
+      fill: var(--primary-cyan);
+    }
+
+    /* Progress Bar */
+    .progress-bar-bg {
+      background: rgba(255, 255, 255, 0.1);
+      height: 8px;
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 8px 0;
+    }
+
+    .progress-bar-fill {
+      background: var(--primary-cyan);
+      height: 100%;
+    }
+
+    /* Chat & Forms */
+    .chat-box {
+      height: 350px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .chat-bubble {
+      background-color: var(--surface-color);
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 13px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 12px;
+      background-color: var(--surface-color);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 8px;
+      color: white;
+      margin-bottom: 12px;
+    }
+
+    .form-input:focus {
+      outline: 1px solid var(--primary-cyan);
+    }
+
+    /* Modals */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.85);
+      z-index: 100;
+      padding: 20px;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background-color: var(--surface-color);
+      border-radius: 16px;
+      padding: 20px;
+      width: 100%;
+      max-width: 500px;
+      border: 1px solid var(--primary-cyan);
+    }
+
+    /* Floating Action Button */
+    .fab {
+      position: fixed;
+      bottom: 80px;
+      right: 20px;
+      background-color: var(--amber-gold);
+      color: #000;
+      padding: 14px 20px;
+      border-radius: 30px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(255, 184, 0, 0.4);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      z-index: 9;
+    }
+
+    .game-iframe-container {
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: #000;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOP APP BAR -->
+  <header class="top-bar">
+    <div class="brand-container">
+      <div class="logo-badge">
+        <svg viewBox="0 0 24 24">
+          <path d="M21,16.5C21,16.88 20.79,17.21 20.47,17.38L12.57,21.82C12.4,21.92 12.2,21.97 12,21.97C11.8,21.97 11.6,21.92 11.43,21.82L3.53,17.38C3.21,17.21 3,16.88 3,16.5V7.5C3,7.12 3.21,6.79 3.53,6.62L11.43,2.18C11.6,2.08 11.8,2.03 12,2.03C12.2,2.03 12.4,2.08 12.57,2.18L20.47,6.62C20.79,6.79 21,7.12 21,7.5V16.5Z"/>
+        </svg>
+      </div>
+      <div class="brand-titles">
+        <h1>VR STUDIO</h1>
+        <span>IMMERSIVE VIRTUAL REALITY</span>
+      </div>
+    </div>
+    <div class="role-switcher" onclick="toggleRole()">
+      <span class="role-badge owner" id="roleBadge">👑 Owner</span>
+    </div>
+  </header>
+
+  <!-- CONTENT AREA -->
+  <main class="content-area">
+
+    <!-- 1. ARCADE TAB -->
+    <section id="arcadeTab" class="tab-content active">
+      <h2 style="margin-bottom: 14px; font-size: 18px; color: var(--primary-cyan);">🕹️ VR Studio Games Arcade</h2>
+      <div id="gamesList">
+        <!-- Dynamic Game Cards Inserted Here -->
+      </div>
+    </section>
+
+    <!-- 2. FEATURED PROJECTS TAB -->
+    <section id="featuredTab" class="tab-content">
+      <h2 style="margin-bottom: 14px; font-size: 18px; color: var(--primary-cyan);">🚀 Upcoming Projects</h2>
+      <div class="card">
+        <div class="card-title">VR Cyber Quest</div>
+        <div style="color: var(--amber-gold); font-size: 12px; margin-top: 4px; font-weight: bold;">In Active Development</div>
+        <div class="progress-bar-bg" style="margin-top: 12px;">
+          <div class="progress-bar-fill" style="width: 65%;"></div>
+        </div>
+        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 10px;">65% Completed</div>
+        <div class="card-desc">An immersive sci-fi puzzle project coming soon to VR Studio.</div>
+      </div>
+    </section>
+
+    <!-- 3. COMMUNITY TAB -->
+    <section id="communityTab" class="tab-content">
+      <h2 style="margin-bottom: 14px; font-size: 18px; color: var(--primary-cyan);">💬 Player Lounge</h2>
+      <div class="chat-box" id="chatBox">
+        <div class="chat-bubble"><b>Gamer1:</b> Cosmic Chaos is awesome!</div>
+        <div class="chat-bubble"><b>Gamer2:</b> Can't wait for VR Cyber Quest!</div>
+      </div>
+      <div style="display: flex; gap: 8px;">
+        <input type="text" id="chatInput" class="form-input" placeholder="Type a message..." style="margin-bottom: 0;">
+        <button class="btn btn-cyan" style="width: 80px;" onclick="sendChatMessage()">Send</button>
+      </div>
+    </section>
+
+    <!-- 4. SUPPORT TAB -->
+    <section id="supportTab" class="tab-content">
+      <h2 style="margin-bottom: 6px; font-size: 18px; color: var(--primary-cyan);">📩 Support Desk</h2>
+      <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px;">Messages are sent directly to the owner's phone console.</p>
+      <textarea id="supportText" class="form-input" rows="5" placeholder="Type your complaint, bug report, or feature request here..."></textarea>
+      <button class="btn btn-cyan" onclick="submitSupport()">Submit Complaint</button>
+    </section>
+
+    <!-- 5. PROFILE TAB -->
+    <section id="profileTab" class="tab-content">
+      <div style="text-align: center; padding: 30px 0;">
+        <div class="logo-badge" style="width: 70px; height: 70px; margin: 0 auto 16px;">
+          <svg viewBox="0 0 24 24" style="width: 40px; height: 40px;"><path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z"/></svg>
+        </div>
+        <h3 id="profileName" style="font-size: 20px;">VR Studio Owner</h3>
+        <p style="color: var(--text-muted); font-size: 13px; margin-top: 4px;">Logged in via Google Account</p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- OWNER FLOATING BUTTON (Visible in Owner Mode) -->
+  <div id="ownerFab" class="fab" onclick="openModal('addGameModal')">
+    ➕ Publish Game
+  </div>
+
+  <!-- BOTTOM NAVIGATION BAR -->
+  <nav class="bottom-nav">
+    <div class="nav-item active" onclick="switchTab('arcadeTab', this)">
+      <svg viewBox="0 0 24 24"><path d="M21,6H3A2,2 0 0,0 1,8V16A2,2 0 0,0 3,18H21A2,2 0 0,0 23,16V8A2,2 0 0,0 21,6M6,15H4V13H6V15M6,11H4V9H6V11M9,13H7V11H9V13M11,15H9V13H11V15M17,13H15V15H13V13H15V11H17V13M20,11H18V9H20V11Z"/></svg>
+      <span>Arcade</span>
+    </div>
+    <div class="nav-item" onclick="switchTab('featuredTab', this)">
+      <svg viewBox="0 0 24 24"><path d="M13.13,22.19L11.5,18.35L10.13,22.19L6.15,20.75L7.91,17.11L4.05,15.74L5.5,11.75L9.35,13.13L10.72,9.28L14.7,10.72L13.33,14.57L17.19,15.94L15.74,19.93L11.89,18.55L13.13,22.19Z"/></svg>
+      <span>Featured</span>
+    </div>
+    <div class="nav-item" onclick="switchTab('communityTab', this)">
+      <svg viewBox="0 0 24 24"><path d="M20,2H4A2,2 0 0,0 2,4V22L6,18H20A2,2 0 0,0 22,16V4A2,2 0 0,0 20,2Z"/></svg>
+      <span>Community</span>
+    </div>
+    <div class="nav-item" onclick="switchTab('supportTab', this)">
+      <svg viewBox="0 0 24 24"><path d="M12,1A9,9 0 0,0 3,10C3,13.7 5.2,16.9 8.5,18.3L7.5,21.5L11.3,19.7C11.5,19.7 11.8,19.7 12,19.7A9,9 0 0,0 21,10A9,9 0 0,0 12,1Z"/></svg>
+      <span>Support</span>
+    </div>
+    <div class="nav-item" onclick="switchTab('profileTab', this)">
+      <svg viewBox="0 0 24 24"><path d="M12,19.2C9.5,19.2 7.29,17.92 6,16C6.03,14 10,12.9 12,12.9C13.97,12.9 17.97,14 18,16C16.71,17.92 14.5,19.2 12,19.2M12,5A3,3 0 0,1 15,8A3,3 0 0,1 12,11A3,3 0 0,1 9,8A3,3 0 0,1 12,5Z"/></svg>
+      <span>Profile</span>
+    </div>
+  </nav>
+
+  <!-- MODAL: ADD GAME (OWNER ONLY) -->
+  <div id="addGameModal" class="modal">
+    <div class="modal-content">
+      <h3 style="margin-bottom: 12px; color: var(--amber-gold);">Publish New Web Game</h3>
+      <input type="text" id="newGameTitle" class="form-input" placeholder="Game Title">
+      <input type="text" id="newGameDesc" class="form-input" placeholder="Description">
+      <input type="text" id="newGameCategory" class="form-input" placeholder="Category (e.g. Action, Sports)">
+      <input type="text" id="newGameUrl" class="form-input" placeholder="Web Game URL (HTML5 link)">
+      <div style="display: flex; gap: 8px;">
+        <button class="btn btn-owner" onclick="addGame()">Publish Game</button>
+        <button class="btn" style="background: #333; color: white;" onclick="closeModal('addGameModal')">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: GAME PLAYER CONTAINER -->
+  <div id="gamePlayerModal" class="modal" style="padding: 0;">
+    <div style="width: 100%; height: 100%; display: flex; flex-direction: column; background: #000;">
+      <div style="padding: 10px 16px; background: var(--bar-color); display: flex; justify-content: space-between; align-items: center;">
+        <span id="playingGameTitle" style="font-weight: bold; color: var(--primary-cyan);">Playing Game</span>
+        <button onclick="closeModal('gamePlayerModal')" style="background: red; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold;">Exit Game</button>
+      </div>
+      <iframe id="gameIframe" class="game-iframe-container" src="about:blank"></iframe>
+    </div>
+  </div>
+
+  <!-- --- JAVASCRIPT LOGIC --- -->
+  <script>
+    // Initial App State
+    let isOwner = true;
+    let games = [
+      {
+        id: '1',
+        title: 'Cosmic Chaos 3D',
+        description: 'Space strategy and dodge game built by VR Studio.',
+        category: 'Sci-Fi Action',
+        url: 'https://example.com'
+      },
+      {
+        id: '2',
+        title: 'Mat Masters Kabaddi',
+        description: 'Action arcade sports simulator.',
+        category: 'Sports Arcade',
+        url: 'https://example.com'
+      }
+    ];
+
+    // Initialize App
+    window.onload = function() {
+      renderGames();
+    };
+
+    // Render Game Cards
+    function renderGames() {
+      const container = document.getElementById('gamesList');
+      container.innerHTML = '';
+      games.forEach(game => {
+        container.innerHTML += `
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">${game.title}</span>
+              <span class="tag">${game.category}</span>
+            </div>
+            <div class="card-desc">${game.description}</div>
+            <button class="btn btn-primary" onclick="playGame('${game.title}', '${game.url}')">▶ Play In-App Now</button>
+          </div>
+        `;
+      });
+    }
+
+    // Tab Switcher
+    function switchTab(tabId, navEl) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      if (navEl) navEl.classList.add('active');
+    }
+
+    // Toggle Owner / Player Role
+    function toggleRole() {
+      isOwner = !isOwner;
+      const badge = document.getElementById('roleBadge');
+      const fab = document.getElementById('ownerFab');
+      const profileName = document.getElementById('profileName');
+
+      if (isOwner) {
+        badge.className = 'role-badge owner';
+        badge.innerText = '👑 Owner';
+        fab.style.display = 'flex';
+        profileName.innerText = 'VR Studio Owner (Admin)';
+      } else {
+        badge.className = 'role-badge player';
+        badge.innerText = '🎮 Player';
+        fab.style.display = 'none';
+        profileName.innerText = 'Gamer_Player1';
+      }
+    }
+
+    // Modal Helpers
+    function openModal(id) { document.getElementById(id).classList.add('active'); }
+    function closeModal(id) { 
+      document.getElementById(id).classList.remove('active'); 
+      if (id === 'gamePlayerModal') {
+        document.getElementById('gameIframe').src = 'about:blank';
+      }
+    }
+
+    // Owner Action: Add Game
+    function addGame() {
+      const title = document.getElementById('newGameTitle').value;
+      const desc = document.getElementById('newGameDesc').value;
+      const cat = document.getElementById('newGameCategory').value || 'VR Release';
+      const url = document.getElementById('newGameUrl').value || 'https://example.com';
+
+      if (title && desc) {
+        games.push({ id: Date.now().toString(), title: title, description: desc, category: cat, url: url });
+        renderGames();
+        closeModal('addGameModal');
+        document.getElementById('newGameTitle').value = '';
+        document.getElementById('newGameDesc').value = '';
+        document.getElementById('newGameCategory').value = '';
+        document.getElementById('newGameUrl').value = '';
+      }
+    }
+
+    // Launch In-App Game
+    function playGame(title, url) {
+      document.getElementById('playingGameTitle').innerText = 'Playing: ' + title;
+      document.getElementById('gameIframe').src = url;
+      openModal('gamePlayerModal');
+    }
+
+    // Send Community Chat
+    function sendChatMessage() {
+      const input = document.getElementById('chatInput');
+      if (input.value.trim() !== '') {
+        const box = document.getElementById('chatBox');
+        const user = isOwner ? '👑 VR Studio Owner' : 'You';
+        box.innerHTML += `<div class="chat-bubble"><b>${user}:</b> ${input.value}</div>`;
+        input.value = '';
+        box.scrollTop = box.scrollHeight;
+      }
+    }
+
+    // Submit Support Complaint
+    function submitSupport() {
+      const text = document.getElementById('supportText').value;
+      if (text.trim() !== '') {
+        alert('Complaint sent! Delivered directly to the owner\'s phone console.');
+        document.getElementById('supportText').value = '';
+      }
+    }
+  </script>
+</body>
+</html>
